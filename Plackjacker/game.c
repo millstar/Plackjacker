@@ -8,8 +8,8 @@
 //Global Variabales
 int i;
 char choice;
-char num_deck[14] = {'A', '2', '3', '4', '5', '6', '7', '8' , '9', ':', 'J', 'Q', 'K'};
-char sym_deck[5] = {'C', 'D', 'H', 'S'};
+char num_deck[14] = "A23456789:JQK";  // ':' is mean 10.
+char sym_deck[5] = "CDHS";
 
 //Global Strutures
 struct cards
@@ -23,13 +23,20 @@ struct hand
 	struct cards card[5];
 };
 
+struct Deck
+{
+	struct cards card[52];
+};
+
 
 //Functions
 void menu();
 void tutorial();
 void game();
-void r_card(); //Random card
 void printplayer(struct hand player);
+int checkdeck(char card[], struct Deck deck2, int count);
+int givescore(char card);
+struct Deck shuffle();
 
 int main()
 {
@@ -65,9 +72,16 @@ void game()
 {
 	system("cls");
 
+	//Declare variables
 	int turn = 0;
 	int p_score = 0;
 	int d_score = 0;
+	int ace_p = 0;
+	int ace_d = 0;
+
+	struct hand player;
+	struct hand dealer;
+	struct Deck outdeck;
 
 	printf("\n\n================================================================================\n");
 	printf("                                   Game Started!!!\n");
@@ -75,8 +89,13 @@ void game()
 
 	printf("Remember Club = C  Diamond = D  Heart = H  Spade = S\n\n");
 
-	struct hand player;
-	struct hand dealer;
+
+	outdeck = shuffle();
+
+	//Print Deck
+	for (i = 0;i < 52;i++) {
+		printf("%c%c\n", outdeck.card[i].number, outdeck.card[i].symbol);
+	}
 
 	// Reset Hand
 	for (i = 0;i < 5;i++) {
@@ -118,7 +137,51 @@ void printplayer(struct hand player)
 }
 
 
-int sum()
+int checkdeck(char card[], struct Deck deck, int count)
 {
+	int chk = 0;
 
+	for (i = 0;i < count;i++)
+	{
+		if (card[0] == deck.card[i].number && card[1] == deck.card[i].symbol) {
+			chk = 1;
+			break;
+		}
+	}
+
+	return chk;
+}
+
+struct Deck shuffle()
+{
+	struct Deck deck;
+	int r_num, r_sym;
+	int count = 0;
+	char card[3];
+
+	//Shuffle Deck
+	srand(time(NULL));
+
+	//First card in deck
+	r_num = rand() % 13;
+	r_sym = rand() % 4;
+	deck.card[0].number = num_deck[r_num];
+	deck.card[0].symbol = sym_deck[r_sym];
+
+	for (i = 1;i < 52;i++) {
+
+		count += 1;
+
+		do {
+			r_num = rand() % 13;
+			r_sym = rand() % 4;
+			card[0] = num_deck[r_num];
+			card[1] = sym_deck[r_sym];
+		} while (checkdeck(card, deck, count));
+
+		deck.card[i].number = card[0];
+		deck.card[i].symbol = card[1];
+	}
+
+	return deck;
 }
