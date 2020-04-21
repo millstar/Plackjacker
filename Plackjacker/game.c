@@ -44,6 +44,7 @@ int givescore(char card);
 int hitstay();
 int checkace(char card);
 int checkwin(struct hand player, int score, int turn, int win);
+void getpoker(int score, int win);
 struct Deck shuffle();
 struct hand sort(struct hand player, int amount);
 
@@ -84,15 +85,24 @@ void menu()
 	printf("================================================================================\n");
 	printf("                             Welcome to Plackjaker\n");
 	printf("================================================================================\n\n");
-	printf("           Type S to start the game or T to goto the tutorial.\n\n");
+	printf("           Type S to start the game or T to goto the tutorial or Q to Quit.\n\n");
 
-	printf("Enter the character:");
-	scanf(" %c", &choice);
 
 	//Try again if it's not in choice.
-	while (toupper(choice) != 'S' ) {
-		printf("Please Enter the correct character:");
+	while (1)
+	{
+		printf("Enter the character : ");
 		scanf(" %c", &choice);
+
+		if (toupper(choice) == 'S') {
+			break;
+		}
+		else if (toupper(choice) == 'T') {
+			break;
+		}
+		else if (toupper(choice) == 'Q') {
+			exit(0);
+		}
 	}
 
 	//Choice
@@ -101,6 +111,7 @@ void menu()
 	else if (toupper(choice) == 'T')
 		tutorial();
 }
+
 
 void game()
 {
@@ -255,10 +266,13 @@ void game()
 	d_win = checkwin(dealer, d_score, d_turn, d_win);
 
 	//Dealer try to defeat player
-	if (d_win != 14 && p_score <= 21 && d_score <= p_score) {
+	if (d_win != 14 && p_score <= 21 && d_score < p_score) {
 		printf("1\n");
 		while (d_win < p_win || p_win == 0)
 		{
+			if (d_win == p_win && d_score == p_score)
+				break;
+
 			printf("2\n");
 			dealer.card[d_turn].number = outdeck.card[j].number;
 			dealer.card[d_turn].symbol = outdeck.card[j].symbol;
@@ -281,7 +295,7 @@ void game()
 			d_win = checkwin(dealer, d_score, d_turn, d_win);
 
 			//Can beat the player?
-			if (d_win >= p_win)
+			if (d_win >= p_win && d_score >= p_score)
 				break;
 
 			if (d_score >= 21)
@@ -292,6 +306,7 @@ void game()
 		}
 	}
 
+	system("cls");
 	printf("================================================================================\n");
 	printf("                                    Game End!!!\n");
 	printf("================================================================================\n\n");
@@ -304,33 +319,44 @@ void game()
 	printf("\nDealer's hand have:");
 	printplayer(dealer, d_turn);
 	printf("\n");
-	printf("Dealer's Score: %d\n\n", d_score);
+	printf("Dealer's Score: %d\n\n\n", d_score);
 
-	printf("P: %d D: %d\n", p_win, d_win);
+	//Show what player get
+	printf("The form player get.\n");
+
+	printf("You get ");
+	getpoker(p_score, p_win);
+
+	printf("Dealer get ");
+	getpoker(d_score, d_win);
+	printf("\n");
 
 	//Check who win
+	printf("\nThe result is ");
+
 	if (p_score > 21) {
-		printf("\nYou Lose!!!\n\n");
+		printf("You Lose!!!\n\n");
 	}
 	else if (d_score > 21) {
-		printf("\nYou Win!!!\n\n");
+		printf("You Win!!!\n\n");
 	}
 	else if (p_win == d_win) {
 
 		if (p_score > d_score)
-			printf("\nYou win!!!\n\n");
+			printf("You win!!!\n\n");
 		else if (p_score < d_score)
-			printf("\nYou Lose!!!\n\n");
+			printf("You Lose!!!\n\n");
 		else
-			printf("\nDraw!!!\n\n");
+			printf("Draw!!!\n\n");
 	}
 	else if (p_win > d_win) {
-		printf("\nYou win!!!\n\n");
+		printf("You win!!!\n\n");
 	}
 	else {
-		printf("\nYou Lose!!!\n\n");
+		printf("You Lose!!!\n\n");
 	}
 
+	printf("\n");
 
 	newgame();
 }
@@ -341,6 +367,81 @@ void tutorial()
 	printf("================================================================================\n");
 	printf("                               Tutorial and Rules\n");
 	printf("================================================================================\n\n");
+
+	printf("Rule of this game\n"
+		" 1. You and Dealer will have 2 cards in the first turn.\n"
+		" 2. Maximum card of hand is 5 cards.\n"
+		" 3. You can hit if you want a better hand or stay if you think this\n"
+		"    hand is enough.\n"
+		" 4. If your hand have sum of score more than 21, you will lose suddenly.\n"
+		" 5. If your hand or dealer is black jack form, game will end and who has\n"
+		"    blackjack will win.\n"
+		" 6. If you and dealer have same hand, It will use score to judge who is winner.\n\n\n"
+
+		"List of the possible of your hand. Arrange from low to high.\n\n"
+
+			" 0. Highscore : Have sum of score not over 21.\n"
+			" Example : 10C 3S 5H = 18\n\n"
+
+			" 1. Pair : Have two cards with same number in your hand.\n"
+			" Example : AS AD\n\n"
+
+			" 2. Two pairs : Have two pair in your hand.\n"
+			" Example : 2H 2S 7C 7S\n\n"
+
+			" 3. 21 : Have sum of numbers is 21. A = 1 or 11  J, Q, K = 10\n"
+			" Example : 10H 9D 2S\n\n"
+
+			" 4. 21 Pair :Have pair and sum of numbers is 21.\n"
+			" Example : AH AC 9S 2D 8C\n\n"
+
+			" 5. 21 Two pairs : Have two pair and sum of numbers is 21.\n"
+			" Example : AH AC 5C 5D 9C\n\n"
+
+			" 6. Three of a kind : Have three cards with same number.\n"
+			" Example : 7C 7D 7H \n\n"
+
+			" 7. 21 Three of a kind : Have three of a kind and sum of numbers is 21.\n"
+			" Example : 2C 2H 2S 10S 5D\n\n"
+
+			" 8. 5 cards x2 : Have five in your hand and not over 21.\n"
+			" Example : 2H 3S 6D 7S AD\n\n"
+
+			" 9. Straight x2 : Have sequence of number.\n"
+			" Example : AS 2H 3D 4C 5H\n\n"
+
+			" 10. Flush x2 : Have five cards with same suit.\n"
+			" Example : 2H 5H 4H 8H AH\n\n"
+
+			" 11. Full House x2 : Have three of a kind and two pair.\n"
+			" Example : 2H 2S 4C 4D 4H\n\n"
+
+			" 12. Four of a kind x2 : Have four cards with same number.\n"
+			" Example : 5C 5D 5H 5D\n\n"
+
+			" 13. Straight Flush x5 : Have straight and flush in your hand.\n"
+			" Example : 2S 3S 4S 5S 6S\n\n"
+
+			" 14. Black jack x3 : Have one card is Ace and the other is 10, J, Q or K. \n"
+			" Example : AS 10H\n\n");
+
+	//Start game
+	while (1)
+	{
+		printf("Are you ready to start. (Y/N): ");
+		scanf(" %c", &choice);
+
+		if (toupper(choice) == 'Y') {
+			game();
+			break;
+		}
+		else if (toupper(choice) == 'N') {
+			menu();
+			break;
+		}
+	}
+
+
 }
 
 void newgame()
@@ -439,21 +540,21 @@ int checkwin(struct hand player, int score, int turn, int win)
 			win = 12;
 
 		else if (threeofkind(player, turn)) {
-			if (score == 21)
+			if (score != 21)
 				win = 7;
 			else
 				win = 6;
 		}
 
 		else if (twopair(player, turn)) {
-			if (score == 21)
+			if (score != 21)
 				win = 2;
 			else
 				win = 5;
 		}
 
 		else if (pair(player, turn)) {
-			if (score == 21)
+			if (score != 21)
 				win = 1;
 			else
 				win = 4;
@@ -477,7 +578,6 @@ int checkwin(struct hand player, int score, int turn, int win)
 		if (straightflush(player)) {
 			win = 13;
 		}
-
 	}
 
 	//Only score 21
@@ -486,6 +586,63 @@ int checkwin(struct hand player, int score, int turn, int win)
 	}
 
 	return win;
+}
+
+void getpoker(int score, int win)
+{
+	if (score <= 21)
+	{
+		switch (win)
+		{
+			case 0:
+				printf("High Score %d\n", score);
+				break;
+			case 1:
+				printf("Pair\n");
+				break;
+			case 2:
+				printf("Two Pair\n");
+				break;
+			case 3:
+				printf("Score 21\n");
+				break;
+			case 4:
+				printf("Pair with Score 21\n");
+				break;
+			case 5:
+				printf("Two Pair with Score 21\n");
+				break;
+			case 6:
+				printf("Three of kind\n");
+				break;
+			case 7:
+				printf("Three of kind with Score 21\n");
+				break;
+			case 8:
+				printf("Five Cards\n");
+				break;
+			case 9:
+				printf("Straight\n");
+				break;
+			case 10:
+				printf("Flush\n");
+				break;
+			case 11:
+				printf("Full House\n");
+				break;
+			case 12:
+				printf("Four of a kind\n");
+				break;
+			case 13:
+				printf("Straight Flush\n");
+				break;
+			case 14:
+				printf("Black jack\n");
+				break;
+		}
+	} else {
+		printf("Over 21\n");
+	}
 }
 
 struct Deck shuffle()
