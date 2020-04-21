@@ -1,0 +1,54 @@
+Rule of this game
+1.You and Dealer will have 2 cards in the first turn.
+2.Maximum card of hand is 5 cards.
+3.You can hit if you want a better hand or stay if you think this hand is enough.
+4.If your hand have sum of score more than 21, you will lose suddenly.
+5.If your hand or dealer is black jack form, game will end and who has black jack will win.
+6.If you and dealer have same hand, It will use score to judge who is winner.
+
+List of the possible of your hand. Arrange from low to high.
+
+ 0. Highscore : Have sum of score not over 21.
+ Example : 10C 3S 5H = 18
+
+ 1. Pair : Have two cards with same number in your hand.
+ Example : AS AD
+
+ 2. Two pairs : Have two pair in your hand.
+ Example : 2H 2S 7C 7S
+
+ 3. 21 : Have sum of numbers is 21. A = 1 or 11  J, Q, K = 10
+ Example : 10H 9D 2S
+
+ 4. 21 Pair :Have pair and sum of numbers is 21.
+ Example : AH AC 9S 2D 8C
+
+ 5. 21 Two pairs : Have two pair and sum of numbers is 21.
+ Example : AH AC 5C 5D 9C
+
+ 6. Three of a kind : Have three cards with same number.
+ Example : 7C 7D 7H 
+
+ 7. 21 Three of a kind : Have three of a kind and sum of numbers is 21.
+ Example : 2C 2H 2S 10S 5D
+
+ 8. 5 cards x2 : Have five in your hand and not over 21.
+ Example : 2H 3S 6D 7S AD
+
+ 9. Straight x2 : Have sequence of number.
+ Example : AS 2H 3D 4C 5H
+
+ 10. Flush x2 : Have five cards with same suit.
+ Example : 2H 5H 4H 8H AH
+
+ 11. Full House x2 : Have three of a kind and two pair.
+ Example : 2H 2S 4C 4D 4H
+
+ 12. Four of a kind x2 : Have four cards with same number.
+ Example : 5C 5D 5H 5D
+
+ 13. Straight Flush x5 : Have straight and flush in your hand.
+ Example : 2S 3S 4S 5S 6S
+
+ 14. Black jack x3 : Have one card is Ace and the other is 10, J, Q or K. 
+ Example : AS 10H
