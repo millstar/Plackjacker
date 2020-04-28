@@ -11,6 +11,7 @@ HANDLE rHnd;    // Handle to read from the console.
 
 //Global Variabales
 int i, k; //for loop
+int money = 2000;
 char choice;
 char num_deck[14] = "A23456789:JQK";  // ':' is mean 10.
 char sym_deck[5] = "CDHS";
@@ -38,6 +39,7 @@ void menu();
 void tutorial();
 void game();
 void newgame();
+void gameover();
 void printplayer(struct hand player, int amount);
 int checkdeck(char card[], struct Deck deck2, int count);
 int givescore(char card);
@@ -87,6 +89,10 @@ void menu()
 	printf("================================================================================\n\n");
 	printf("           Type S to start the game or T to goto the tutorial or Q to Quit.\n\n");
 
+	int *reset_money;
+
+	reset_money = &money;
+	*reset_money = 2000;
 
 	//Try again if it's not in choice.
 	while (1)
@@ -107,7 +113,7 @@ void menu()
 
 	//Choice
 	if (toupper(choice) == 'S')
-		game();
+		game(money);
 	else if (toupper(choice) == 'T')
 		tutorial();
 }
@@ -128,6 +134,10 @@ void game()
 	int d_ace = 0;
 	int p_win = 0;
 	int d_win = 0;
+	int bet = 0;
+	int *r_money;
+
+	r_money = &money;
 
 	struct hand player;
 	struct hand dealer;
@@ -142,6 +152,14 @@ void game()
 
 	outdeck = shuffle();
 
+	printf("You current have %d $\n\n\n", *r_money);
+
+	do {
+		printf("How much you want to bet : ");
+		scanf("%d", &bet);
+		printf("\n");
+
+	} while (bet > money);
 
 	// Reset Hand
 	for (i = 0;i < 5;i++) {
@@ -185,7 +203,6 @@ void game()
 		j++;//Count Card
 	}
 
-
 	while (p_score > 21 && p_ace > 0) {
 				d_score -= 10;
 				d_ace--;
@@ -210,6 +227,7 @@ void game()
 	printf("\n");
 	printf("Dealer's Score: %d\n\n", d_score - hide);
 
+	j = 4; //j will use for mark position of card in deck.
 
 	//Player turn
 	p_win = checkwin(player, p_score, p_turn, p_win);
@@ -232,7 +250,7 @@ void game()
 			}
 
 			p_turn++;
-			j++;//Count card
+			j++; //Next card
 
 			//Show hand
 			player = sort(player, p_turn);
@@ -322,12 +340,10 @@ void game()
 	printf("Dealer's Score: %d\n\n\n", d_score);
 
 	//Show what player get
-	printf("The form player get.\n");
-
-	printf("You get ");
+	printf("\nYou get ");
 	getpoker(p_score, p_win);
 
-	printf("Dealer get ");
+	printf("\nDealer get ");
 	getpoker(d_score, d_win);
 	printf("\n");
 
@@ -336,29 +352,40 @@ void game()
 
 	if (p_score > 21) {
 		printf("You Lose!!!.\n\n");
+		*r_money -= bet; 
 	}
 	else if (d_score > 21) {
 		printf("You Win!!!\n\n");
+		*r_money += bet; 
 	}
 	else if (p_win == d_win) {
 
-		if (p_score > d_score)
+		if (p_score > d_score) {
 			printf("You win!!!\n\n");
-		else if (p_score < d_score)
+			*r_money += bet; 
+		}
+		else if (p_score < d_score){
 			printf("You Lose!!!\n\n");
+			*r_money -= bet; 
+		}
 		else
 			printf("Draw!!!\n\n");
 	}
 	else if (p_win > d_win) {
 		printf("You win!!!\n\n");
+		*r_money += bet; 
 	}
 	else {
 		printf("You Lose!!!\n\n");
+		*r_money -= bet; 
 	}
 
-	printf("\n");
+	printf("You current have %d $\n\n\n", *r_money);
 
-	newgame();
+	if (*r_money == 0)
+		gameover();
+	else
+		newgame();
 }
 
 void tutorial()
@@ -428,7 +455,7 @@ void tutorial()
 	//Start game
 	while (1)
 	{
-		printf("Are you ready to start. (Y/N): ");
+		printf("Are you ready to start? (Y/N): ");
 		scanf(" %c", &choice);
 
 		if (toupper(choice) == 'Y') {
@@ -447,7 +474,7 @@ void tutorial()
 void newgame()
 {
 	while (1) {
-		printf("Do you want to start new game? (Y/N): ");
+		printf("Do you want to continue? (Y/N): ");
 		scanf(" %c", &choice);
 		printf("\n");
 
@@ -460,6 +487,26 @@ void newgame()
 			break;
 		} 
 	}
+}
+
+void gameover(){
+	printf("Game Over!!! You don't have money\n\n");
+
+	while (1) {
+		printf("Do you want to start new game? (Y/N): ");
+		scanf(" %c", &choice);
+		printf("\n");
+
+		if (toupper(choice) == 'Y') {
+			menu();
+			break;
+		}
+		else if (toupper(choice) == 'N') {
+			exit(0);
+			break;
+		} 
+	}
+
 }
 
 //Function parts
@@ -536,7 +583,6 @@ int checkwin(struct hand player, int score, int turn, int win)
 	if (win != 14 && score <= 21) {
 
 		if (fourofkind(player, turn))
-
 			win = 12;
 
 		else if (threeofkind(player, turn)) {
@@ -566,6 +612,9 @@ int checkwin(struct hand player, int score, int turn, int win)
 
 		win = 8;
 
+		if (fourofkind(player, turn))
+			win = 12;
+
 		if (straight(player)) {
 			win = 9;
 		}
@@ -581,7 +630,7 @@ int checkwin(struct hand player, int score, int turn, int win)
 	}
 
 	//Only score 21
-	if (score == 21 && win != 14) {
+	if (score == 21 && win < 8) {
 		win = 3;
 	}
 
@@ -665,15 +714,16 @@ struct Deck shuffle()
 
 		count += 1;
 
-		do {
-			r_num = rand() % 13;
-			r_sym = rand() % 4;
-			card[0] = num_deck[r_num];
-			card[1] = sym_deck[r_sym];
-		} while (checkdeck(card, deck, count));
+		//do {
+		r_num = rand() % 13;
+		r_sym = rand() % 4;
+		card[0] = num_deck[r_num];
+		card[1] = sym_deck[r_sym];
+		//} while (checkdeck(card, deck, count));
 
 		deck.card[i].number = card[0];
 		deck.card[i].symbol = card[1];
+
 	}
 
 	return deck;
@@ -746,7 +796,7 @@ int pair(struct hand player, int turn)
 int twopair(struct hand player, int turn)
 {
 	if (pair(player, turn) == 2)
-		return 2;
+		return 1;
 	else
 		return 0;
 }
@@ -765,7 +815,7 @@ int threeofkind(struct hand player, int turn)
 	}
 
 	if (c == 3)
-		return 6;
+		return 1;
 	else
 		return 0;
 }
@@ -788,7 +838,7 @@ int straight(struct hand player)
 		start++;
 	}
 
-	return 9;
+	return 1;
 }
 
 int flush(struct hand player)
@@ -799,7 +849,7 @@ int flush(struct hand player)
 		}
 	}
 
-	return 10;
+	return 1;
 }
 
 int fullhouse(struct hand player)
@@ -824,12 +874,12 @@ int fullhouse(struct hand player)
 	} else if (t == 2) {
 
 		if (player.card[3].number == player.card[4].number)
-			return 11;
+			return 1;
 
 	} else if (t == 4) {
 
 		if (player.card[0].number == player.card[1].number)
-			return 11;
+			return 1;
 	}
 
 	return 0;
@@ -838,27 +888,28 @@ int fullhouse(struct hand player)
 
 int fourofkind(struct hand player, int turn)
 {
-	int c = 0; //Count card
+	int c; //Count card
 
-	for (i = 0;i < turn;i++) {
-		for(k = i+1;k < turn;k++) {
-			if (player.card[i].number == player.card[k].number) 
+	for (i = 0;i < 2;i++) {
+
+		c = 0;
+
+		for(k = i + 1;k < turn;k++) {
+			if (player.card[i].number == player.card[k].number)
 				c++;
-			else
-				break;
 		}
+
+		if (c == 3)
+			return 1;
 	}
 
-	if (c == 4)
-		return 12;
-	else
-		return 0;
+	return 0;
 }
 
 int straightflush(struct hand player)
 {
 	if (straight(player) && flush(player))
-		return 13;
+		return 1;
 	else
 		return 0;
 }
