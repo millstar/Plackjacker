@@ -714,11 +714,11 @@ struct Deck shuffle()
 
 		count += 1;
 
-		//do {
-		r_num = rand() % 13;
-		r_sym = rand() % 4;
-		card[0] = num_deck[r_num];
-		card[1] = sym_deck[r_sym];
+		//do { //Use this loop when want this have one deck.
+			r_num = rand() % 13;
+			r_sym = rand() % 4;
+			card[0] = num_deck[r_num];
+			card[1] = sym_deck[r_sym];
 		//} while (checkdeck(card, deck, count));
 
 		deck.card[i].number = card[0];
